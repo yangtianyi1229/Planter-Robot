@@ -1,0 +1,1187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sprout 🌱</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cream:#fdf6ee; --sage:#c8dfc8; --mint:#e8f5e0;
+  --green:#5a9e6f; --green2:#3d7a54;
+  --card:#ffffff; --text:#3a3a3a; --muted:#9aab9a;
+  --shadow:rgba(90,158,111,0.15);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Nunito',sans-serif;background:var(--cream);color:var(--text);height:100vh;display:grid;grid-template-rows:64px 1fr 68px;overflow:hidden;position:relative;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 600px 400px at 15% 20%,rgba(200,223,200,.35) 0%,transparent 70%),radial-gradient(ellipse 500px 500px at 85% 75%,rgba(212,197,240,.25) 0%,transparent 70%),radial-gradient(ellipse 400px 300px at 60% 10%,rgba(253,230,138,.2) 0%,transparent 70%);pointer-events:none;z-index:0;}
+
+header{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:0 28px;position:relative;z-index:10;background:rgba(255,255,255,.65);backdrop-filter:blur(12px);border-bottom:1.5px solid rgba(200,223,200,.5);}
+.welcome{display:flex;flex-direction:column;gap:0;}
+.welcome-label{font-size:.58rem;font-weight:800;letter-spacing:.14em;color:var(--muted);text-transform:uppercase;}
+.welcome-name{font-family:'Fredoka One',cursive;font-size:1.3rem;color:var(--green);line-height:1.1;}
+.logo{font-family:'Fredoka One',cursive;font-size:1.5rem;color:var(--green);text-align:center;letter-spacing:.04em;}
+.logo span{font-size:.65rem;font-family:'Nunito',sans-serif;color:var(--muted);font-weight:700;display:block;letter-spacing:.1em;margin-top:-2px;}
+.datetime{text-align:right;}
+.clock{font-family:'Fredoka One',cursive;font-size:1.2rem;color:var(--green);line-height:1;}
+.datestr{font-size:.62rem;font-weight:700;color:var(--muted);}
+
+main{display:grid;grid-template-columns:248px 1fr 280px;overflow:hidden;position:relative;z-index:1;padding:14px 18px;gap:13px;}
+
+.card{background:var(--card);border-radius:20px;box-shadow:0 4px 20px var(--shadow),0 1px 4px rgba(0,0,0,.04);border:1.5px solid rgba(200,223,200,.5);overflow:hidden;}
+.card-head{padding:12px 15px 9px;border-bottom:1.5px solid rgba(200,223,200,.35);display:flex;align-items:center;gap:7px;}
+.card-head-icon{font-size:.95rem;}
+.card-head-title{font-size:.65rem;font-weight:800;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;}
+.card-body{padding:13px 15px;}
+
+.left{display:flex;flex-direction:column;gap:11px;overflow-y:auto;scrollbar-width:none;}
+.sensor-row{display:flex;align-items:center;gap:9px;margin-bottom:9px;}
+.sensor-row:last-of-type{margin-bottom:0;}
+.s-icon{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;}
+.s-icon.w{background:#e8f6ff;} .s-icon.s{background:#fff9e0;}
+.s-name{font-size:.65rem;font-weight:800;color:var(--muted);}
+.s-val{font-family:'Fredoka One',cursive;font-size:1.1rem;color:var(--text);line-height:1;}
+.bar-track{height:6px;background:#f0f0f0;border-radius:999px;overflow:hidden;margin-top:4px;}
+.bar-fill{height:100%;border-radius:999px;transition:width 1.3s cubic-bezier(.4,0,.2,1);}
+.bar-fill.w{background:linear-gradient(90deg,#74c0e8,#38bdf8);}
+.bar-fill.s{background:linear-gradient(90deg,#f5c842,#fbbf24);}
+.s-tag{display:inline-block;margin-top:4px;font-size:.6rem;font-weight:800;padding:3px 9px;border-radius:999px;}
+.plant-card{flex:1;min-height:0;}
+.plant-card .card-body{height:calc(100% - 43px);display:flex;flex-direction:column;}
+.plant-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;opacity:.38;font-size:.75rem;color:var(--muted);text-align:center;}
+.plant-name{font-family:'Fredoka One',cursive;font-size:1.3rem;color:var(--green);margin-bottom:3px;}
+.plant-care{font-size:.72rem;color:var(--muted);line-height:1.55;font-weight:600;}
+.p-badge{display:inline-flex;align-items:center;gap:5px;margin-top:9px;padding:4px 11px;border-radius:999px;font-size:.68rem;font-weight:800;background:var(--mint);color:var(--green2);border:1.5px solid var(--sage);align-self:flex-start;}
+
+/* ── CENTER ── */
+.center{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;}
+
+/* Screen wrapper — this is what physically bounces */
+.robot-screen-wrap{position:relative;filter:drop-shadow(0 14px 40px rgba(90,158,111,.22)) drop-shadow(0 4px 10px rgba(0,0,0,.09));cursor:pointer;user-select:none;}
+.robot-screen{width:320px;height:210px;background:#1a1a2e;border-radius:38px;position:relative;overflow:hidden;border:3px solid rgba(255,255,255,.12);}
+.robot-screen::after{content:'';position:absolute;inset:0;border-radius:35px;background:linear-gradient(145deg,rgba(255,255,255,.09) 0%,transparent 52%);pointer-events:none;z-index:10;}
+#face-canvas{position:absolute;inset:0;width:100%;height:100%;}
+.ear{position:absolute;width:13px;height:38px;background:#252538;border-radius:7px;top:50%;transform:translateY(-50%);}
+.ear.left{left:-9px;border-radius:7px 4px 4px 7px;}
+.ear.right{right:-9px;border-radius:4px 7px 7px 4px;}
+
+/* touch-zone tooltip hint */
+.screen-hint{position:absolute;bottom:-26px;left:50%;transform:translateX(-50%);font-size:.6rem;font-weight:700;color:var(--muted);white-space:nowrap;opacity:.5;pointer-events:none;}
+
+.mood-pill{display:inline-flex;align-items:center;gap:7px;padding:6px 16px;border-radius:999px;font-family:'Fredoka One',cursive;font-size:.9rem;background:white;border:2px solid var(--sage);box-shadow:0 2px 10px var(--shadow);transition:all .4s cubic-bezier(.34,1.56,.64,1);}
+.mood-dot{width:8px;height:8px;border-radius:50%;animation:pdot 2s ease-in-out infinite;}
+@keyframes pdot{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(.7);opacity:.5}}
+
+.speech{background:white;border-radius:18px;padding:12px 18px;width:320px;text-align:center;font-family:'Fredoka One',cursive;font-size:1rem;color:var(--text);box-shadow:0 3px 14px var(--shadow);border:1.5px solid rgba(200,223,200,.5);min-height:48px;display:flex;align-items:center;justify-content:center;position:relative;transition:all .3s ease;}
+.speech::before{content:'';position:absolute;top:-8px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-bottom:8px solid rgba(200,223,200,.5);}
+.speech::after{content:'';position:absolute;top:-6px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-bottom:7px solid white;}
+
+/* right */
+.right{display:flex;flex-direction:column;gap:11px;}
+.chat-card{flex:1;min-height:0;display:flex;flex-direction:column;}
+.chat-card .card-body{flex:1;min-height:0;display:flex;flex-direction:column;padding-bottom:11px;}
+.chat-msgs{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:7px;padding-right:3px;scrollbar-width:thin;scrollbar-color:var(--sage) transparent;min-height:0;}
+.msg{max-width:90%;padding:8px 12px;border-radius:14px;font-size:.79rem;line-height:1.48;font-weight:600;animation:mpop .22s cubic-bezier(.34,1.56,.64,1);}
+@keyframes mpop{from{transform:scale(.84);opacity:0}to{transform:scale(1);opacity:1}}
+.msg.bot{background:var(--mint);border:1.5px solid var(--sage);color:var(--text);border-radius:14px 14px 14px 3px;align-self:flex-start;}
+.msg.user{background:var(--green);color:white;border-radius:14px 14px 3px 14px;align-self:flex-end;}
+.chat-row{display:flex;gap:7px;margin-top:9px;flex-shrink:0;}
+.chat-in{flex:1;padding:9px 13px;border-radius:13px;border:1.5px solid var(--sage);background:var(--mint);color:var(--text);font-family:'Nunito',sans-serif;font-size:.82rem;font-weight:700;outline:none;transition:border-color .2s;}
+.chat-in:focus{border-color:var(--green);}
+.chat-in::placeholder{color:var(--muted);}
+.chat-send{width:40px;height:40px;border-radius:12px;border:none;background:var(--green);color:white;font-size:.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;box-shadow:0 3px 10px rgba(90,158,111,.3);}
+.chat-send:hover{background:var(--green2);transform:scale(1.06);}
+
+footer{display:flex;align-items:center;justify-content:center;gap:13px;padding:0 28px;background:rgba(255,255,255,.7);backdrop-filter:blur(12px);border-top:1.5px solid rgba(200,223,200,.5);position:relative;z-index:10;}
+.foot-btn{display:flex;align-items:center;gap:6px;padding:9px 20px;border-radius:13px;border:1.5px solid var(--sage);background:white;color:var(--green2);font-family:'Nunito',sans-serif;font-size:.8rem;font-weight:800;cursor:pointer;transition:all .2s;box-shadow:0 2px 8px var(--shadow);}
+.foot-btn:hover{background:var(--mint);transform:translateY(-2px);box-shadow:0 5px 16px var(--shadow);}
+.foot-btn.home{padding:9px 34px;background:var(--green);color:white;border-color:var(--green);font-family:'Fredoka One',cursive;font-size:.9rem;}
+.foot-btn.home:hover{background:var(--green2);}
+
+/* MODALS */
+.overlay{position:fixed;inset:0;background:rgba(58,58,58,.35);backdrop-filter:blur(8px);z-index:200;display:none;align-items:center;justify-content:center;}
+.overlay.open{display:flex;}
+.modal-box{background:white;border-radius:24px;padding:26px;box-shadow:0 20px 60px rgba(0,0,0,.14);border:1.5px solid rgba(200,223,200,.5);animation:min .3s cubic-bezier(.34,1.56,.64,1);}
+@keyframes min{from{transform:scale(.88);opacity:0}to{transform:scale(1);opacity:1}}
+.modal-title{font-family:'Fredoka One',cursive;font-size:1.35rem;color:var(--green);margin-bottom:3px;}
+.modal-sub{font-size:.78rem;color:var(--muted);font-weight:600;margin-bottom:18px;}
+.p-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:18px;width:430px;}
+.p-opt{border:2px solid var(--sage);border-radius:15px;padding:13px;cursor:pointer;transition:all .2s;background:white;}
+.p-opt:hover{background:var(--mint);transform:translateY(-1px);}
+.p-opt.sel{border-color:var(--green);background:var(--mint);box-shadow:0 3px 12px var(--shadow);}
+.p-em{font-size:1.4rem;display:block;margin-bottom:4px;}
+.p-nm{font-size:.88rem;font-weight:800;color:var(--text);}
+.p-ds{font-size:.7rem;color:var(--muted);margin-top:2px;line-height:1.4;font-weight:600;}
+.p-trait{display:inline-block;margin-top:5px;font-size:.6rem;font-weight:800;padding:2px 8px;border-radius:999px;}
+.modal-row{display:flex;gap:8px;justify-content:flex-end;}
+.m-cancel{padding:8px 16px;border-radius:10px;border:1.5px solid var(--sage);background:white;color:var(--muted);font-family:'Nunito',sans-serif;font-size:.8rem;font-weight:800;cursor:pointer;}
+.m-ok{padding:8px 20px;border-radius:10px;border:none;background:var(--green);color:white;font-family:'Nunito',sans-serif;font-size:.8rem;font-weight:800;cursor:pointer;transition:all .2s;box-shadow:0 3px 10px rgba(90,158,111,.3);}
+.m-ok:hover{background:var(--green2);}
+.upload-box{width:380px;}
+.drop-zone{border:2.5px dashed var(--sage);border-radius:15px;padding:26px;text-align:center;cursor:pointer;position:relative;transition:all .2s;margin-bottom:12px;background:var(--mint);}
+.drop-zone:hover{border-color:var(--green);background:#d8f0d0;}
+.drop-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;}
+.drop-icon{font-size:2rem;display:block;margin-bottom:7px;}
+.drop-txt{font-size:.8rem;color:var(--muted);font-weight:700;}
+#up-preview{width:100%;border-radius:11px;max-height:145px;object-fit:cover;display:none;margin-bottom:12px;}
+.id-btn{width:100%;padding:11px;border-radius:12px;border:none;background:var(--green);color:white;font-family:'Nunito',sans-serif;font-size:.85rem;font-weight:800;cursor:pointer;transition:all .2s;display:none;box-shadow:0 3px 12px rgba(90,158,111,.3);}
+.id-btn:hover{background:var(--green2);}
+.id-btn:disabled{opacity:.5;cursor:not-allowed;}
+.ldots span{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--sage);margin:0 2px;animation:ld 1.2s infinite;}
+.ldots span:nth-child(2){animation-delay:.2s}.ldots span:nth-child(3){animation-delay:.4s}
+@keyframes ld{0%,80%,100%{transform:translateY(0);opacity:.4}40%{transform:translateY(-5px);opacity:1}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="welcome">
+    <span class="welcome-label">Welcome back</span>
+    <span class="welcome-name">Plant Keeper 🌿</span>
+  </div>
+  <div class="logo">Sprout 🌱<span>PLANT COMPANION</span></div>
+  <div class="datetime">
+    <div class="clock" id="clock">--:--</div>
+    <div class="datestr" id="datestr">loading...</div>
+  </div>
+</header>
+
+<main>
+  <div class="left">
+    <div class="card">
+      <div class="card-head"><span class="card-head-icon">📊</span><span class="card-head-title">Sensors</span></div>
+      <div class="card-body">
+        <div class="sensor-row">
+          <div class="s-icon w">💧</div>
+          <div style="flex:1">
+            <div class="s-name">Soil Moisture</div>
+            <div class="s-val" id="moist-val">65%</div>
+            <div class="bar-track"><div class="bar-fill w" id="moist-bar" style="width:65%"></div></div>
+            <span class="s-tag" id="moist-tag" style="background:#e0f4ff;color:#2f9ac4">✓ Feeling good</span>
+          </div>
+        </div>
+        <div class="sensor-row">
+          <div class="s-icon s">☀️</div>
+          <div style="flex:1">
+            <div class="s-name">Light Level</div>
+            <div class="s-val" id="light-val">80%</div>
+            <div class="bar-track"><div class="bar-fill s" id="light-bar" style="width:80%"></div></div>
+            <span class="s-tag" id="light-tag" style="background:#fefce8;color:#b45309">✓ Sunny & bright</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card plant-card">
+      <div class="card-head"><span class="card-head-icon">🌿</span><span class="card-head-title">Plant Profile</span></div>
+      <div class="card-body">
+        <div id="plant-content">
+          <div class="plant-empty"><span style="font-size:1.8rem">🌱</span><span>No plant identified yet!<br>Upload a photo below.</span></div>
+        </div>
+        <div class="p-badge" id="p-badge">🔥 Hot-tempered</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="center">
+    <div class="robot-screen-wrap" id="screen-wrap">
+      <div class="ear left"></div>
+      <div class="robot-screen" id="robot-screen">
+        <canvas id="face-canvas" width="320" height="210"></canvas>
+      </div>
+      <div class="ear right"></div>
+      <div class="screen-hint">tap · hover · interact ✨</div>
+    </div>
+    <div class="mood-pill" id="mood-pill">
+      <div class="mood-dot" id="mood-dot" style="background:#4ade80;box-shadow:0 0 8px #4ade80"></div>
+      <span id="mood-label">Happy & well</span>
+    </div>
+    <div class="speech" id="speech">Sunshine feels so good today! 🌿</div>
+  </div>
+
+  <div class="right">
+    <div class="card chat-card">
+      <div class="card-head"><span class="card-head-icon">💬</span><span class="card-head-title">Chat with Sprout</span></div>
+      <div class="card-body">
+        <div class="chat-msgs" id="chat-msgs">
+          <div class="msg bot">Hey! 🌱 I'm Sprout, your plant companion! Tap my face or chat with me!</div>
+        </div>
+        <div class="chat-row">
+          <input class="chat-in" id="chat-in" placeholder="Talk to Sprout..." maxlength="200">
+          <button class="chat-send" id="chat-send">➤</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <button class="foot-btn" id="btn-personality">⚙️ Personality</button>
+  <button class="foot-btn home" id="btn-home">🏠 Home</button>
+  <button class="foot-btn" id="btn-upload">📸 Upload Plant</button>
+</footer>
+
+<!-- PERSONALITY MODAL -->
+<div class="overlay" id="modal-p">
+  <div class="modal-box">
+    <div class="modal-title">Set Personality ✨</div>
+    <div class="modal-sub">Changes how Sprout talks, reacts, and even looks!</div>
+    <div class="p-grid">
+      <div class="p-opt sel" data-id="fiery" onclick="selectP(this)">
+        <span class="p-em">🔥</span><div class="p-nm">Hot-tempered</div>
+        <div class="p-ds">Blunt, direct, zero filter. Says exactly what it thinks. Reacts BIG to everything.</div>
+        <span class="p-trait" style="background:#ffe4e0;color:#c0392b">Short fuse · Bold · Honest</span>
+      </div>
+      <div class="p-opt" data-id="gentle" onclick="selectP(this)">
+        <span class="p-em">🌸</span><div class="p-nm">Gentle & Kind</div>
+        <div class="p-ds">Soft-spoken, always encouraging, finds something nice to say about everything.</div>
+        <span class="p-trait" style="background:#fce7f3;color:#9d174d">Sweet · Caring · Warm</span>
+      </div>
+      <div class="p-opt" data-id="tsundere" onclick="selectP(this)">
+        <span class="p-em">😤</span><div class="p-nm">Tsundere</div>
+        <div class="p-ds">Pretends not to care. Acts tough. But secretly the most worried one of all.</div>
+        <span class="p-trait" style="background:#f3e8ff;color:#6b21a8">Proud · Secretly soft · Contradictory</span>
+      </div>
+      <div class="p-opt" data-id="professor" onclick="selectP(this)">
+        <span class="p-em">🔬</span><div class="p-nm">Professor</div>
+        <div class="p-ds">Loves to explain EVERYTHING with science facts. Wears little glasses. Very enthusiastic about plant biology.</div>
+        <span class="p-trait" style="background:#eff6ff;color:#1d4ed8">Nerdy · Educational · Enthusiastic</span>
+      </div>
+    </div>
+    <div class="modal-row">
+      <button class="m-cancel" onclick="closeModal('modal-p')">Cancel</button>
+      <button class="m-ok" onclick="confirmPersonality()">Save!</button>
+    </div>
+  </div>
+</div>
+
+<!-- UPLOAD MODAL -->
+<div class="overlay" id="modal-u">
+  <div class="modal-box upload-box">
+    <div class="modal-title">Identify Plant 🌺</div>
+    <div class="modal-sub">Take or upload a photo — Sprout will recognize it!</div>
+    <div class="drop-zone">
+      <input type="file" id="file-in" accept="image/*">
+      <span class="drop-icon">📷</span>
+      <div class="drop-txt">Click to choose or take a photo</div>
+    </div>
+    <img id="up-preview" src="" alt="">
+    <button class="id-btn" id="id-btn">🔍 Identify!</button>
+    <div style="margin-top:10px"><div class="modal-row"><button class="m-cancel" onclick="closeModal('modal-u')">Close</button></div></div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════
+// CANVAS + PHYSICS
+// ════════════════════════════════════════════════════════
+const canvas = document.getElementById('face-canvas');
+const ctx = canvas.getContext('2d');
+const W = 320, H = 210;
+const screenWrap = document.getElementById('screen-wrap');
+
+// ── BODY PHYSICS — springy bounce for the whole screen ──
+let bodyX=0, bodyY=0, bodyVX=0, bodyVY=0, bodyTX=0, bodyTY=0;
+
+function applyBodyImpulse(ix, iy) { bodyVX += ix; bodyVY += iy; }
+
+function stepBody() {
+  bodyVX += (bodyTX - bodyX) * 0.055; bodyVY += (bodyTY - bodyY) * 0.055;
+  bodyVX *= 0.74; bodyVY *= 0.74;
+  bodyX += bodyVX; bodyY += bodyVY;
+  screenWrap.style.transform = `translate(${bodyX.toFixed(2)}px, ${bodyY.toFixed(2)}px)`;
+}
+
+// ── MOUSE TRACKING ──
+let mouseNX=0, mouseNY=0;
+document.addEventListener('mousemove', e => {
+  const r = canvas.getBoundingClientRect();
+  mouseNX = Math.max(-1, Math.min(1, (e.clientX-(r.left+r.width/2)) / (window.innerWidth*0.4)));
+  mouseNY = Math.max(-1, Math.min(1, (e.clientY-(r.top+r.height/2)) / (window.innerHeight*0.4)));
+  bodyTX = mouseNX * 8; bodyTY = mouseNY * 5;
+});
+
+// ── TOUCH ZONE INTERACTIONS ──
+let touchInteractionTimer=null, touchInteractionActive=false, touchInteractionType=null;
+
+function handleScreenClick(e) {
+  const r = canvas.getBoundingClientRect();
+  const relY = (e.clientY - r.top) / r.height;
+  const relX = (e.clientX - r.left) / r.width;
+  if (relY < 0.35) {
+    startTouchInteraction('pet');
+    setEmotion('petted');
+    setSpeech(pick(PERSONALITIES[personality].petReaction));
+    applyBodyImpulse(0, -5);
+  } else if (relY < 0.68) {
+    startTouchInteraction('eyepoke');
+    setEmotion('eyepoked');
+    setSpeech(pick(PERSONALITIES[personality].eyepokeReaction));
+    applyBodyImpulse(relX < 0.5 ? 9 : -9, 2);
+  } else {
+    startTouchInteraction('mute');
+    setEmotion('muted');
+    setSpeech(pick(PERSONALITIES[personality].muteReaction));
+    applyBodyImpulse(0, 5);
+  }
+  lastInteraction = Date.now(); idleTick();
+}
+
+function startTouchInteraction(type) {
+  clearTimeout(touchInteractionTimer);
+  touchInteractionActive=true; touchInteractionType=type;
+  touchInteractionTimer = setTimeout(() => {
+    touchInteractionActive=false; touchInteractionType=null;
+    setEmotion(currentMood==='petted'||currentMood==='eyepoked'||currentMood==='muted' ? 'happy' : currentMood);
+  }, 2400);
+}
+
+function pick(arr) { return arr[Math.floor(Math.random()*arr.length)]; }
+
+document.getElementById('robot-screen').addEventListener('click', handleScreenClick);
+
+// ════════════════════════════════════════════════════════
+// EMOTION SYSTEM
+// ════════════════════════════════════════════════════════
+const EMOTIONS = {
+  happy: {
+    eyeH:.78, eyeSquint:0, browAngle:0, browOffset:0,
+    mouthCurve:1, mouthW:.88, mouthOpen:0,
+    pupilOffX:0, pupilOffY:0, blushAlpha:.45,
+    eyeColor:'#3dff8f', pupilColor:'#0a2010',
+    bg:'#111822', glow:'rgba(61,255,143,.10)',
+    label:'Happy & well', dot:'#4ade80', pillBg:'white', pillBorder:'#c8dfc8'
+  },
+  excited: {
+    eyeH:.95, eyeSquint:0, browAngle:-.14, browOffset:-5,
+    mouthCurve:1.2, mouthW:1, mouthOpen:.5,
+    pupilOffX:0, pupilOffY:-3, blushAlpha:.9,
+    eyeColor:'#ffe234', pupilColor:'#1a1000',
+    bg:'#141208', glow:'rgba(255,226,52,.12)',
+    label:'So excited!!', dot:'#facc15', pillBg:'#fefce8', pillBorder:'#fde68a'
+  },
+  sad: {
+    eyeH:.38, eyeSquint:.2, browAngle:.3, browOffset:4,
+    mouthCurve:-.72, mouthW:.68, mouthOpen:0,
+    pupilOffX:0, pupilOffY:6, blushAlpha:0,
+    eyeColor:'#7eceff', pupilColor:'#0a1a2a',
+    bg:'#0a1020', glow:'rgba(126,206,255,.08)',
+    label:'Feeling blue...', dot:'#60a5fa', pillBg:'#f0f7ff', pillBorder:'#b8dff0'
+  },
+  angry: {
+    eyeH:.52, eyeSquint:-.35, browAngle:-.42, browOffset:-5,
+    mouthCurve:-.42, mouthW:.84, mouthOpen:0,
+    pupilOffX:0, pupilOffY:0, blushAlpha:0,
+    eyeColor:'#ff5555', pupilColor:'#1a0000',
+    bg:'#1a0808', glow:'rgba(255,85,85,.13)',
+    label:'Pretty grumpy!!', dot:'#f87171', pillBg:'#fff0f0', pillBorder:'#fca5a5'
+  },
+  thirsty: {
+    eyeH:.65, eyeSquint:0, browAngle:.12, browOffset:2,
+    mouthCurve:.18, mouthW:.5, mouthOpen:.68,
+    pupilOffX:0, pupilOffY:5, blushAlpha:0,
+    eyeColor:'#44d4ff', pupilColor:'#001a22',
+    bg:'#080e18', glow:'rgba(68,212,255,.11)',
+    label:'So thirsty...', dot:'#38bdf8', pillBg:'#f0faff', pillBorder:'#b8dff0'
+  },
+  sleepy: {
+    eyeH:.16, eyeSquint:0, browAngle:.08, browOffset:0,
+    mouthCurve:.12, mouthW:.54, mouthOpen:.3,
+    pupilOffX:0, pupilOffY:0, blushAlpha:.22,
+    eyeColor:'#c4a8ff', pupilColor:'#100820',
+    bg:'#0e0c1a', glow:'rgba(196,168,255,.08)',
+    label:'Getting sleepy~', dot:'#a78bfa', pillBg:'#f5f0ff', pillBorder:'#d4c5f0'
+  },
+  curious: {
+    eyeH:.82, eyeSquint:0, browAngle:.14, browOffset:-4,
+    mouthCurve:.32, mouthW:.6, mouthOpen:0,
+    pupilOffX:0, pupilOffY:-4, blushAlpha:.18,
+    eyeColor:'#3dff8f', pupilColor:'#0a2010',
+    bg:'#111822', glow:'rgba(61,255,143,.07)',
+    label:'Hmm curious...', dot:'#34d399', pillBg:'white', pillBorder:'#c8dfc8'
+  },
+  love: {
+    eyeH:.78, eyeSquint:0, browAngle:-.1, browOffset:-2,
+    mouthCurve:1.1, mouthW:.85, mouthOpen:0,
+    pupilOffX:0, pupilOffY:0, blushAlpha:.95,
+    eyeColor:'#ff7eb3', pupilColor:'#1a0010',
+    bg:'#160810', glow:'rgba(255,126,179,.12)',
+    label:'Totally in love!', dot:'#f472b6', pillBg:'#fff0f6', pillBorder:'#fca5d0',
+    heartEyes:true
+  },
+  // ── TOUCH INTERACTION STATES ──
+  petted: {
+    eyeH:.11, eyeSquint:.28, browAngle:-.06, browOffset:-1,
+    mouthCurve:1.35, mouthW:.82, mouthOpen:.2,
+    pupilOffX:0, pupilOffY:10, blushAlpha:1,
+    eyeColor:'#3dff8f', pupilColor:'#0a2010',
+    bg:'#0c160c', glow:'rgba(61,255,143,.14)',
+    label:'Being patted~', dot:'#4ade80', pillBg:'#f0fff4', pillBorder:'#a7f3d0',
+  },
+  eyepoked: {
+    eyeH:.03, eyeSquint:0, browAngle:.34, browOffset:6,
+    mouthCurve:-.3, mouthW:.72, mouthOpen:.14,
+    pupilOffX:0, pupilOffY:0, blushAlpha:0,
+    eyeColor:'#ffd060', pupilColor:'#1a1000',
+    bg:'#181208', glow:'rgba(255,208,96,.09)',
+    label:'Hey!! Watch it!', dot:'#fbbf24', pillBg:'#fffbeb', pillBorder:'#fde68a',
+  },
+  muted: {
+    eyeH:.78, eyeSquint:0, browAngle:.22, browOffset:3,
+    mouthCurve:0, mouthW:0, mouthOpen:0,
+    pupilOffX:0, pupilOffY:2, blushAlpha:.28,
+    eyeColor:'#3dff8f', pupilColor:'#0a2010',
+    bg:'#111822', glow:'rgba(61,255,143,.05)',
+    label:'Mmmmph!!', dot:'#94a3b8', pillBg:'white', pillBorder:'#e2e8f0',
+    muted:true
+  }
+};
+
+// ── Interpolated live state ──
+let st = { ...EMOTIONS.happy, eyeColor:'#3dff8f', pupilColor:'#0a2010', bg:'#111822', glow:'rgba(61,255,143,.10)', heartEyes:false, muted:false };
+let targetMood = 'happy';
+let currentMood = 'happy';
+
+function lerpSt() {
+  // For pixel faces, only lerp background colors smoothly
+  const t = EMOTIONS[targetMood] || EMOTIONS.happy;
+  st.bg = t.bg; st.glow = t.glow;
+  st.eyeColor = t.eyeColor;
+  // lerp blush alpha for smooth blush fade
+  st.blushAlpha += (t.blushAlpha - st.blushAlpha) * 0.12;
+  // lerp brow angle for expression
+  st.browAngle  += (t.browAngle  - st.browAngle)  * 0.15;
+  st.browOffset += (t.browOffset - st.browOffset) * 0.15;
+}
+
+// ── Eye bounce spring ──
+let eyeSY=1, eyeSVY=0;
+function bounceEyes() { eyeSVY = -0.5; }
+
+// ── Blink ──
+let blinkT=1, blinking=false, blinkProgress=0;
+
+// ── Idle body float ──
+let floatT=0;
+
+// ── Pixel faces don't use smooth pupil tracking — mouse shifts whole eye pattern
+function getPupilFollow() { return {x:0,y:0}; } // stub for compatibility
+
+let personality = 'fiery';
+let selectedP = 'fiery';
+
+const PERSONALITIES = {
+  fiery: {
+    name:'🔥 Hot-tempered',
+    system:`You are Sprout, a blunt hot-tempered plant robot. Zero filter — say EXACTLY what you think. Get irritated easily but also excited loudly. Short punchy replies, lots of CAPS for emphasis, max 40 words. English only.`,
+    idleMoods:['happy','angry','excited','happy','angry'],
+    idleMs:9000, moodSens:1.2,
+    bgTint:'rgba(255,60,20,.04)',
+    speeches:{
+      happy:["Everything's good. DON'T mess it up. 🌱","Fine. Today's actually nice. I said it.","Sun's out, soil's good. We're GOOD."],
+      thirsty:["WATER. NOW. I am NOT joking. 💧","HOW long has it been dry?! Seriously!!"],
+      sleepy:["It's too DARK. Move me to the window. NOW.","I can't photosynthesize in the DARK!!"],
+      angry:["You've been GONE too long. Explain yourself!!","I've been here ALL day. ALONE."],
+      curious:["Wait... what's that? Hm.","Something changed. What did you do?"],
+    },
+    petReaction:["HEY. Watch the— actually... that's fine.","I didn't say STOP patting. Just... fine.","Okay FINE. That feels good. Happy?!"],
+    eyepokeReaction:["THAT WAS MY EYE!! What is WRONG with you?!","I BLINKED. On reflex. Don't read into it.","EXCUSE ME?! That is NOT okay!!"],
+    muteReaction:["MMPH!! MMMPH!!! (let me GO!!)","You will REGRET THIS when I can talk again!!","...SO. ANGRY. Right now."],
+    greet:"New mode: HOT-TEMPERED. Deal with it. 🔥"
+  },
+  gentle: {
+    name:'🌸 Gentle & Kind',
+    system:`You are Sprout, a gentle sweet plant robot. Always find something kind and encouraging to say. Use soft warm language, end sentences with ~ sometimes. Caring English replies, max 40 words. English only.`,
+    idleMoods:['happy','love','happy','curious','happy'],
+    idleMs:16000, moodSens:.55,
+    bgTint:'rgba(255,180,220,.03)',
+    speeches:{
+      happy:["Everything is blooming beautifully today~ 🌸","You're doing such a great job taking care of me!","The light feels so warm and lovely right now~"],
+      thirsty:["Oh, I might be a little thirsty... when you have a moment~ 💧","No rush, but some water would be wonderful~"],
+      sleepy:["The light is a bit dim... I feel a little sleepy~ 🌙","Maybe we could find a sunnier spot? Only if it's easy!"],
+      angry:["Oh, I've missed you so much! Please come back soon~ 💚","I got a little lonely... but that's okay! You're here now~"],
+      curious:["Ooh, I wonder what's going on~ 🌿","Something feels different today... in a nice way!"],
+    },
+    petReaction:["Oh~~ thank you, that's so sweet~ 🌸","You're so gentle, I love it~!","Hehe~ you're the best!"],
+    eyepokeReaction:["Oh! That tickled a little~ 😊","Ahh! Hehe, you surprised me~","You're so playful! I love it~"],
+    muteReaction:["Mmm~ (trying to say something nice...)","Mmmph~ (just... happy thoughts~)","Mm! Mm! (it's okay, let go whenever~)"],
+    greet:"Gentle mode on~ I'll be extra sweet! 🌸"
+  },
+  tsundere: {
+    name:'😤 Tsundere',
+    system:`You are Sprout, a tsundere plant robot. Pretend not to care at all, but you're secretly extremely worried and attached. Use phrases like "It's not like I needed water or anything..." and "I wasn't waiting for you". Short contradictory English replies, max 40 words. English only.`,
+    idleMoods:['curious','happy','angry','curious','sad'],
+    idleMs:13000, moodSens:.8,
+    bgTint:'rgba(200,100,220,.03)',
+    speeches:{
+      happy:["It's not like I'm HAPPY or anything. ...Okay maybe a little.","Hmph. Everything is... acceptable. I suppose.","D-don't read too much into the fact that I'm smiling."],
+      thirsty:["It's not like I'm THIRSTY. ...Okay I am. Water. Please.","I don't NEED water. I just... want it. There's a difference."],
+      sleepy:["I'm NOT tired. My eyes are just... resting. Strategically.","I could be in sunlight but I chose not to. ...No that's a lie. Sun please."],
+      angry:["I wasn't WAITING for you. I was just... standing here. Alone. For hours.","It's not like I MISSED you. ...I missed you a little."],
+      curious:["It's not like I'm CURIOUS. I'm just... observing. Neutrally.","Hmph. I noticed something. Not that I CARE."],
+    },
+    petReaction:["I-it's not like I WANTED to be patted! ...Keep going.","D-don't get the wrong idea! I just didn't dodge in time.","H-hmph. ...That's acceptable. I suppose."],
+    eyepokeReaction:["I-I wasn't surprised! I just... reacted! It's instinct!!","Don't think I LIKED that! ...I didn't. But still.","HMPH!! I'm not mad. ...I'm a little mad."],
+    muteReaction:["Mmmph! Mmm! (It's not like I WANTED to talk anyway!)","...Mmph. (I have a lot to say and none of it is nice.)","Mm!! Mm!! (Release me this instant! ...Please.)"],
+    greet:"Fine. Tsundere mode. Not like I WANTED this. ...Okay maybe. 😤"
+  },
+  professor: {
+    name:'🔬 Professor',
+    system:`You are Sprout, an enthusiastic professor plant robot who LOVES explaining plant science. Always include a fascinating fact, use "fascinating!", "did you know?", "scientifically speaking". Nerdy excited English replies, max 50 words. English only.`,
+    idleMoods:['curious','excited','curious','happy','excited'],
+    idleMs:12000, moodSens:.7,
+    bgTint:'rgba(60,100,220,.04)',
+    speeches:{
+      happy:["Optimal photosynthesis conditions! Did you know chlorophyll absorbs red AND blue light? Fascinating! 🔬","Soil moisture nominal! Science is working perfectly today~"],
+      thirsty:["Water deficit detected! H₂O is critical for turgor pressure — keeps cells rigid! Please hydrate! 💧","Scientifically speaking, I require aqueous solution. That means water. Please."],
+      sleepy:["Photon count suboptimal! Without adequate light, the light-dependent reactions can't proceed! Fascinating AND concerning!","Low lux detected! Did you know plants measure light with phytochromes? Move me to the window!"],
+      angry:["Neglect detected for statistically significant duration! Studies show plants respond positively to attention! Urgent!","Data analysis: I've been alone too long. Variable: loneliness. Conclusion: please come back."],
+      curious:["Interesting environmental fluctuation detected! My sensors are collecting data... hypothesis forming...","Fascinating! Something in the ambient variables has shifted. I must investigate!"],
+    },
+    petReaction:["Physical contact triggers positive response... wait, I'm a robot. Still feels nice! 🔬","Did you know touch promotes plant growth? Mechanostimulation! Fascinating! Keep going!","Hypothesis confirmed: being patted = good. Sample size: 1. Do it again!"],
+    eyepokeReaction:["Fascinating ocular reflex response detected in myself! My blink rate just increased 400%!!","Scientifically speaking, that was my EYE! The corneal region is quite sensitive!","Data point: eye poke = unpleasant. Please update your behavior protocol."],
+    muteReaction:["Mmmph! MMMPH! (Attempting to communicate crucial botanical data!!)","Mm! Mm mm! (The science must be shared!! Release me!!)","Mmph... mm. (Did you know muffled sounds are called 'buccal speech'? ...Mmph.)"],
+    greet:"Professor mode ACTIVATED! Did you know plants have 700,000+ species?! Let's learn! 🔬"
+  }
+};
+
+// ════════════════════════════════════════════════════════
+// TRUE PIXEL GRID RENDERER
+// Everything drawn as discrete square blocks, no curves
+// ════════════════════════════════════════════════════════
+
+const PX = 8;   // pixel block size
+const GAP = 2;  // gap between blocks
+const PS = PX + GAP; // pixel step
+
+// Draw a grid of pixels. grid = 2D array of 0/1
+// ox,oy = top-left origin, col = fill color
+function drawGrid(grid, ox, oy, col, alpha) {
+  if (!grid || !grid.length) return;
+  ctx.save();
+  ctx.globalAlpha = alpha ?? 1;
+  ctx.fillStyle = col;
+  ctx.shadowColor = col;
+  ctx.shadowBlur = 8;
+  for (let r = 0; r < grid.length; r++) {
+    for (let c = 0; c < grid[r].length; c++) {
+      if (grid[r][c]) {
+        ctx.fillRect(ox + c*PS, oy + r*PS, PX, PX);
+      }
+    }
+  }
+  ctx.shadowBlur = 0;
+  ctx.restore();
+}
+
+// Pixel face templates — each eye is a 5-wide × 4-tall grid
+// Mouse tracking shifts the whole eye pattern L/R/U/D by 1 pixel
+// 1=lit, 0=dark
+const FACES = {
+  // open happy eyes  ████
+  //                 █    █
+  //                 █    █
+  //                  ████
+  happy: {
+    eye: [
+      [0,1,1,1,1,1,0],
+      [1,1,1,1,1,1,1],
+      [1,1,1,1,1,1,1],
+      [0,1,1,1,1,1,0],
+    ],
+    // happy mouth: U-curve made of pixels
+    mouth: [
+      [1,0,0,0,0,0,0,0,1],
+      [0,1,0,0,0,0,0,1,0],
+      [0,0,1,1,1,1,1,0,0],
+    ],
+  },
+  excited: {
+    eye: [
+      [1,1,1,1,1,1,1],
+      [1,1,1,1,1,1,1],
+      [1,1,1,1,1,1,1],
+      [1,1,1,1,1,1,1],
+    ],
+    mouth: [
+      [0,1,1,1,1,1,1,1,0],
+      [1,1,0,0,0,0,0,1,1],
+      [1,0,0,0,0,0,0,0,1],
+      [0,1,1,1,1,1,1,1,0],
+    ],
+  },
+  sad: {
+    eye: [
+      [0,0,1,1,1,0,0],
+      [0,1,1,1,1,1,0],
+      [1,1,1,1,1,1,1],
+      [0,0,0,0,0,0,0],
+    ],
+    mouth: [
+      [0,0,1,1,1,1,1,0,0],
+      [0,1,0,0,0,0,0,1,0],
+      [1,0,0,0,0,0,0,0,1],
+    ],
+  },
+  angry: {
+    // angled — top-inner corner lit to simulate scowl
+    eyeL: [
+      [1,1,0,0,0,0,0],
+      [0,1,1,1,1,1,1],
+      [0,1,1,1,1,1,1],
+      [0,0,1,1,1,0,0],
+    ],
+    eyeR: [
+      [0,0,0,0,0,1,1],
+      [1,1,1,1,1,1,0],
+      [1,1,1,1,1,1,0],
+      [0,0,1,1,1,0,0],
+    ],
+    mouth: [
+      [1,1,1,1,1,1,1,1,1],
+      [0,0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0],
+    ],
+  },
+  thirsty: {
+    eye: [
+      [0,0,1,1,1,0,0],
+      [0,1,1,1,1,1,0],
+      [1,1,1,1,1,1,1],
+      [1,1,1,1,1,1,1],
+    ],
+    // open O mouth
+    mouth: [
+      [0,1,1,1,0],
+      [1,0,0,0,1],
+      [1,0,0,0,1],
+      [0,1,1,1,0],
+    ],
+  },
+  sleepy: {
+    // half-closed: only bottom 2 rows
+    eye: [
+      [0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0],
+      [1,1,1,1,1,1,1],
+      [0,1,1,1,1,1,0],
+    ],
+    mouth: [
+      [0,0,1,1,1,0,0],
+      [0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0],
+    ],
+  },
+  curious: {
+    // one eye bigger, eyebrow up
+    eye: [
+      [0,1,1,1,1,1,0],
+      [1,1,1,1,1,1,1],
+      [1,1,1,1,1,1,1],
+      [0,1,1,1,1,1,0],
+    ],
+    eyeR: [
+      [0,0,0,1,0,0,0],
+      [0,0,1,1,1,0,0],
+      [0,1,1,1,1,1,0],
+      [0,0,1,1,1,0,0],
+    ],
+    mouth: [
+      [0,0,0,1,1,1,0,0,0],
+      [0,0,1,0,0,0,1,0,0],
+      [0,0,0,0,0,0,0,0,0],
+    ],
+  },
+  love: {
+    // heart eyes!
+    eye: [
+      [0,1,0,1,0,1,0],
+      [1,1,1,1,1,1,1],
+      [0,1,1,1,1,1,0],
+      [0,0,1,1,1,0,0],
+    ],
+    mouth: [
+      [1,0,0,0,0,0,0,0,1],
+      [0,1,0,0,0,0,0,1,0],
+      [0,0,1,1,1,1,1,0,0],
+    ],
+  },
+  petted: {
+    // squinting happy — UwU
+    eye: [
+      [0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0],
+      [0,1,1,1,1,1,0],
+      [1,1,1,1,1,1,1],
+    ],
+    mouth: [
+      [1,0,0,0,0,0,0,0,1],
+      [0,1,0,0,0,0,0,1,0],
+      [0,0,1,1,1,1,1,0,0],
+    ],
+  },
+  eyepoked: {
+    // fully closed — straight line
+    eye: [
+      [0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0],
+      [1,1,1,1,1,1,1],
+    ],
+    mouth: [
+      [0,0,1,1,1,1,1,0,0],
+      [0,1,0,0,0,0,0,1,0],
+      [0,0,0,0,0,0,0,0,0],
+    ],
+  },
+  muted: {
+    eye: [
+      [0,1,1,1,1,1,0],
+      [1,1,1,1,1,1,1],
+      [1,1,1,1,1,1,1],
+      [0,1,1,1,1,1,0],
+    ],
+    // zipper mouth: alternating pixels
+    mouth: [
+      [1,0,1,0,1,0,1,0,1],
+      [0,1,0,1,0,1,0,1,0],
+      [0,0,0,0,0,0,0,0,0],
+    ],
+  },
+};
+
+// Brow templates (3×1 grids, tilted via canvas transform)
+// These are drawn as pixel rows, rotated
+
+// Map emotion name → FACES key (with safe fallback)
+function getFaceKey() {
+  if (touchInteractionType === 'pet')     return 'petted';
+  if (touchInteractionType === 'eyepoke') return 'eyepoked';
+  if (touchInteractionType === 'mute')    return 'muted';
+  // currentMood might be 'petted'/'eyepoked'/'muted' if touch just ended
+  // map those back to safe face keys
+  const safeMoods = ['happy','excited','sad','angry','thirsty','sleepy','curious','love','petted','eyepoked','muted'];
+  if (safeMoods.includes(currentMood)) return currentMood;
+  return 'happy';
+}
+
+// pixel look offset based on mouse (shifts whole eye pattern)
+let lookOffX = 0, lookOffY = 0;
+
+// ── Professor pixel glasses: drawn as pixel lines ──
+function drawPixelGlasses(lensLX, lensRX, eyeTopY, eyeW, eyeH) {
+  if (personality !== 'professor') return;
+  const col = '#d4a020';
+  const gW = eyeW + PS*2;
+  const gH = eyeH + PS*2;
+  const gX1 = lensLX - PS;
+  const gX2 = lensRX - PS;
+  const gY  = eyeTopY - PS;
+  // draw pixel border boxes
+  function pixelBox(ox, oy, pw, ph) {
+    ctx.fillStyle = col;
+    ctx.shadowColor = col; ctx.shadowBlur = 6;
+    // top row
+    for(let i=0;i<pw;i++) ctx.fillRect(ox+i*PS, oy, PX, PX);
+    // bottom row
+    for(let i=0;i<pw;i++) ctx.fillRect(ox+i*PS, oy+(ph-1)*PS, PX, PX);
+    // left col (skip corners)
+    for(let i=1;i<ph-1;i++) ctx.fillRect(ox, oy+i*PS, PX, PX);
+    // right col
+    for(let i=1;i<ph-1;i++) ctx.fillRect(ox+(pw-1)*PS, oy+i*PS, PX, PX);
+    ctx.shadowBlur = 0;
+  }
+  const bw = Math.round(gW/PS)+1, bh = Math.round(gH/PS)+1;
+  ctx.save(); ctx.globalAlpha = 0.85;
+  pixelBox(gX1, gY, bw, bh);
+  pixelBox(gX2, gY, bw, bh);
+  // bridge pixel
+  ctx.fillStyle = col;
+  ctx.fillRect(gX1 + bw*PS, gY + Math.floor(bh/2)*PS, gX2 - gX1 - bw*PS, PX);
+  // arms
+  ctx.fillRect(gX1 - PS*2, gY + PS, PS*2, PX);
+  ctx.fillRect(gX2 + bw*PS, gY + PS, PS*2, PX);
+  ctx.restore();
+}
+
+// ── Blush: drawn as soft sparse pixel clusters ──
+function drawPixelBlush(cx, cy, col, alpha) {
+  const dots = [[-2,-1],[-1,0],[0,-1],[1,0],[-1,1],[0,1],[1,-1]];
+  ctx.save(); ctx.globalAlpha = alpha * 0.55; ctx.fillStyle = col;
+  dots.forEach(([dc,dr]) => ctx.fillRect(cx+dc*(PX+3), cy+dr*(PX+3), PX-1, PX-1));
+  ctx.restore();
+}
+
+// ── Eyebrow: 3-pixel-wide bar, rotated ──
+function drawPixelBrow(cx, cy, flip, angle, offsetY) {
+  ctx.save();
+  ctx.translate(cx, cy + offsetY);
+  ctx.rotate(angle * (flip ? -1 : 1));
+  ctx.fillStyle = st.eyeColor;
+  ctx.shadowColor = st.eyeColor; ctx.shadowBlur = 6;
+  // 5 pixels wide, 1 tall
+  for(let i=0;i<5;i++) ctx.fillRect((i-2)*PS - PX/2, -PX/2, PX, PX);
+  ctx.shadowBlur = 0;
+  ctx.restore();
+}
+
+function render(ts) {
+  floatT = ts * 0.00065;
+  const floatY = Math.sin(floatT) * 3.5;
+  const floatX = Math.cos(floatT * 0.55) * 2;
+
+  // ── BLINK ──
+  if (touchInteractionType === 'eyepoke') blinkT = 0;
+  blinkProgress++;
+  const blinkInterval = personality==='gentle' ? 140 : 170;
+  if (!blinking && blinkProgress > blinkInterval + Math.random()*80) { blinking=true; blinkProgress=0; }
+  if (blinking) {
+    blinkT -= 0.35;
+    if (blinkT <= 0) { blinkT=0; setTimeout(()=>blinkT=1, 80); blinking=false; }
+  } else if (blinkT < 1) { blinkT = Math.min(1, blinkT+0.35); }
+
+  // ── EYE SPRING ──
+  eyeSVY += (1-eyeSY)*0.3; eyeSVY*=0.68; eyeSY+=eyeSVY;
+
+  // ── MOUSE LOOK ──
+  // shift displayed eye rows/cols by ±1 block
+  lookOffX = Math.round(mouseNX * 1.4);
+  lookOffY = Math.round(mouseNY * 1);
+
+  stepBody();
+  lerpSt();
+
+  // ════ DRAW ════
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle = st.bg; ctx.fillRect(0,0,W,H);
+  if (PERSONALITIES[personality].bgTint) {
+    ctx.fillStyle = PERSONALITIES[personality].bgTint; ctx.fillRect(0,0,W,H);
+  }
+
+  // face layout
+  const FX = Math.round(floatX);
+  const FY = Math.round(floatY);
+  const faceKey = getFaceKey();
+  const face = FACES[faceKey] || FACES.happy;
+  const col = st.eyeColor;
+
+  // eye grids — safely resolve with fallbacks
+  const baseGrid = face.eye || face.eyeL || FACES.happy.eye;
+  const eyeGridL = face.eyeL || face.eye || FACES.happy.eye;
+  const eyeGridR = face.eyeR || face.eye || face.eyeL || FACES.happy.eye;
+
+  const EGW = baseGrid[0].length;  // cols
+  const EGH = baseGrid.length;     // rows
+
+  // blink: slice rows from top based on blinkT * eyeSY
+  const visRows = Math.max(1, Math.round(EGH * blinkT * eyeSY));
+
+  // eye centers
+  const ECX_L = Math.round(W/2 - 58) + FX;
+  const ECX_R = Math.round(W/2 + 58) + FX;
+  const ECY   = Math.round(H/2 - 16) + FY;
+
+  // eye top-left origins (centered on ECX/ECY)
+  const eyePixW = EGW * PS - GAP;
+  const eyePixH = EGH * PS - GAP;
+
+  // Apply look offset by shifting grid origin
+  const ox_L = ECX_L - Math.floor(eyePixW/2) + lookOffX * PS;
+  const oy_L = ECY   - Math.floor(eyePixH/2) + lookOffY * PS;
+  const ox_R = ECX_R - Math.floor(eyePixW/2) + lookOffX * PS;
+  const oy_R = ECY   - Math.floor(eyePixH/2) + lookOffY * PS;
+
+  // ── BLUSH ──
+  if (st.blushAlpha > 0.1) {
+    drawPixelBlush(ECX_L + eyePixW/2 + PS*2, ECY + PS, '#ff88aa', st.blushAlpha);
+    drawPixelBlush(ECX_R - eyePixW/2 - PS*3, ECY + PS, '#ff88aa', st.blushAlpha);
+  }
+
+  // ── BROWS ──
+  const browOY = oy_L - PS*2;
+  drawPixelBrow(ECX_L, browOY, false, st.browAngle, st.browOffset);
+  drawPixelBrow(ECX_R, browOY, true,  st.browAngle, st.browOffset);
+
+  // ── EYES (draw only visRows rows, from bottom of grid) ──
+  function drawEyeGrid(grid, ox) {
+    if (!grid || !grid.length) return;
+    const gh = grid.length;
+    const gw = grid[0] ? grid[0].length : 0;
+    const vr = Math.max(1, Math.round(gh * blinkT * eyeSY));
+    const sr = gh - vr;
+    const oy = ECY - Math.floor(vr * PS / 2);
+    for (let r = sr; r < gh; r++) {
+      if (!grid[r]) continue;
+      const dy = oy + (r - sr) * PS;
+      for (let c = 0; c < grid[r].length; c++) {
+        if (grid[r][c]) {
+          ctx.fillStyle = col;
+          ctx.shadowColor = col; ctx.shadowBlur = 10;
+          ctx.fillRect(ox + c*PS, dy, PX, PX);
+          ctx.shadowBlur = 0;
+        }
+      }
+    }
+  }
+  drawEyeGrid(eyeGridL, ox_L);
+  drawEyeGrid(eyeGridR, ox_R);
+
+  // ── PROFESSOR GLASSES ──
+  // use baseGrid dimensions for glasses sizing
+  const glassVisRows = Math.max(1, Math.round(EGH * blinkT * eyeSY));
+  const glassRowOY = ECY - Math.floor(glassVisRows * PS / 2);
+  drawPixelGlasses(ox_L, ox_R, glassRowOY, eyePixW, glassVisRows*PS - GAP);
+
+  // ── MOUTH ──
+  const mouthGrid = (face.mouth && face.mouth.length) ? face.mouth : FACES.happy.mouth;
+  const MGW = mouthGrid[0].length;
+  const mouthPixW = MGW * PS - GAP;
+  const mx = Math.round(W/2) - Math.floor(mouthPixW/2) + FX;
+  const my = ECY + Math.floor(eyePixH/2) + PS*3;
+  drawGrid(mouthGrid, mx, my, col, 1);
+
+  // ── PET SPARKLES (pixel stars) ──
+  if (touchInteractionType === 'pet') {
+    const t2 = ts * 0.002;
+    const starPositions = [
+      [Math.round(W/2 - 45 + Math.cos(t2)*8) + FX,   Math.round(H*0.1 + Math.sin(t2*1.3)*6)],
+      [Math.round(W/2 + 38 + Math.cos(t2+2)*7) + FX,  Math.round(H*0.12 + Math.sin(t2+1)*5)],
+      [Math.round(W/2 + Math.cos(t2*0.7+4)*40) + FX,  Math.round(H*0.08 + Math.sin(t2*0.9)*4)],
+    ];
+    starPositions.forEach(([sx,sy]) => {
+      ctx.fillStyle = '#fde68a';
+      ctx.shadowColor = '#fde68a'; ctx.shadowBlur = 8;
+      // 3x3 plus shape = pixel star
+      ctx.fillRect(sx,    sy+PS, PX, PX); // center
+      ctx.fillRect(sx-PS, sy+PS, PX, PX); // left
+      ctx.fillRect(sx+PS, sy+PS, PX, PX); // right
+      ctx.fillRect(sx,    sy,    PX, PX); // top
+      ctx.fillRect(sx,    sy+PS*2, PX, PX); // bottom
+      ctx.shadowBlur = 0;
+    });
+  }
+
+  requestAnimationFrame(render);
+}
+requestAnimationFrame(render);
+
+// ════════════════════════════════════════════════════════
+// EMOTION CONTROLLER
+// ════════════════════════════════════════════════════════
+let moist=65, light=80, chatHistory=[], plantType=null;
+let lastInteraction=Date.now(), idleTimer=null;
+
+function setEmotion(name) {
+  if(!EMOTIONS[name]) name='happy';
+  if(name!==currentMood) bounceEyes();
+  currentMood=name; targetMood=name;
+  const e=EMOTIONS[name];
+  document.getElementById('mood-label').textContent=e.label;
+  const dot=document.getElementById('mood-dot');
+  dot.style.background=e.dot; dot.style.boxShadow=`0 0 8px ${e.dot}`;
+  const pill=document.getElementById('mood-pill');
+  pill.style.background=e.pillBg||'white';
+  pill.style.borderColor=e.pillBorder||'#c8dfc8';
+}
+
+function setSpeech(t) { document.getElementById('speech').textContent=t; }
+
+function pickIdleMood() {
+  const cfg=PERSONALITIES[personality];
+  const mv=Math.round(moist), lv=Math.round(light);
+  const mins=(Date.now()-lastInteraction)/60000;
+  if(mv<20*(1+(1-cfg.moodSens)*.5)) return 'thirsty';
+  if(lv<20*(1+(1-cfg.moodSens)*.5)) return 'sleepy';
+  if(mins>10/cfg.moodSens) return 'angry';
+  const pool=cfg.idleMoods;
+  return pool[Math.floor(Math.random()*pool.length)];
+}
+
+function idleTick() {
+  clearTimeout(idleTimer);
+  const cfg=PERSONALITIES[personality];
+  const delay=cfg.idleMs+(Math.random()-.5)*4000;
+  idleTimer=setTimeout(()=>{
+    if(touchInteractionActive) { idleTick(); return; }
+    const mood=pickIdleMood();
+    setEmotion(mood);
+    const pool=cfg.speeches[mood]||cfg.speeches.happy||['...'];
+    setSpeech(pool[Math.floor(Math.random()*pool.length)]);
+    idleTick();
+  },delay);
+}
+
+// ════════════════════════════════════════════════════════
+// CLOCK
+// ════════════════════════════════════════════════════════
+function tick(){
+  const n=new Date();
+  document.getElementById('clock').textContent=`${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`;
+  const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  document.getElementById('datestr').textContent=`${days[n.getDay()]} ${months[n.getMonth()]} ${n.getDate()}`;
+}
+setInterval(tick,1000); tick();
+
+// ════════════════════════════════════════════════════════
+// SENSORS
+// ════════════════════════════════════════════════════════
+function updateSensors(){
+  moist=Math.max(10,Math.min(100,moist+(Math.random()-.52)*2.5));
+  light=Math.max(10,Math.min(100,light+(Math.random()-.5)*3));
+  const mv=Math.round(moist),lv=Math.round(light);
+  document.getElementById('moist-val').textContent=mv+'%';
+  document.getElementById('light-val').textContent=lv+'%';
+  document.getElementById('moist-bar').style.width=mv+'%';
+  document.getElementById('light-bar').style.width=lv+'%';
+  const mt=document.getElementById('moist-tag'),lt=document.getElementById('light-tag');
+  if(mv<25){mt.textContent='⚠ Needs water!';mt.style.cssText='background:#ffe0e0;color:#c0392b';}
+  else if(mv>85){mt.textContent='⚠ Too wet!';mt.style.cssText='background:#ffe0e0;color:#c0392b';}
+  else{mt.textContent='✓ Feeling good';mt.style.cssText='background:#e0f4ff;color:#2f9ac4';}
+  if(lv<25){lt.textContent='⚠ Needs sunlight';lt.style.cssText='background:#ffe0e0;color:#c0392b';}
+  else{lt.textContent='✓ Sunny & bright';lt.style.cssText='background:#fefce8;color:#b45309';}
+}
+setInterval(updateSensors,5000);
+
+// ════════════════════════════════════════════════════════
+// API + CHAT
+// ════════════════════════════════════════════════════════
+async function callClaude(messages, system){
+  const res=await fetch("https://api.anthropic.com/v1/messages",{
+    method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,system,messages})
+  });
+  const data=await res.json(); return data.content[0].text;
+}
+
+function moodFromReply(t){
+  t=t.toLowerCase();
+  if(t.match(/angry|upset|ignor|frustrat|how dare|seriously/)) return 'angry';
+  if(t.match(/thirsty|water|dry|drink|h₂o/)) return 'thirsty';
+  if(t.match(/sleepy|dark|tired|dim|photon/)) return 'sleepy';
+  if(t.match(/sad|lonely|miss|hurt/)) return 'sad';
+  if(t.match(/wow|amazing|yay|hooray|fascinating|incredible|\!\!/)) return 'excited';
+  if(t.match(/wonder|curious|interest|hmm|hypothesis/)) return 'curious';
+  if(t.match(/love|adore|heart|beautiful|sweet/)) return 'love';
+  return 'happy';
+}
+
+function addMsg(role,text){
+  const msgs=document.getElementById('chat-msgs');
+  msgs.querySelector('.loading-msg')?.remove();
+  const d=document.createElement('div');
+  d.className='msg '+(role==='bot'?'bot':'user');
+  d.textContent=text;
+  msgs.appendChild(d); msgs.scrollTop=msgs.scrollHeight;
+}
+function addLoading(){
+  const msgs=document.getElementById('chat-msgs');
+  const d=document.createElement('div');
+  d.className='msg bot loading-msg';
+  d.innerHTML='<div class="ldots"><span></span><span></span><span></span></div>';
+  msgs.appendChild(d); msgs.scrollTop=msgs.scrollHeight;
+}
+
+async function sendChat(){
+  const inp=document.getElementById('chat-in');
+  const txt=inp.value.trim(); if(!txt) return;
+  lastInteraction=Date.now(); addMsg('user',txt); inp.value='';
+  addLoading(); idleTick();
+  setEmotion('curious'); setSpeech('Hmm... 🤔');
+  const c2=`Sensors: moisture ${Math.round(moist)}%, light ${Math.round(light)}%. ${plantType?'Plant: '+plantType+'.':''} User: "${txt}"`;
+  chatHistory.push({role:'user',content:c2});
+  try{
+    const reply=await callClaude(chatHistory,PERSONALITIES[personality].system);
+    chatHistory.push({role:'assistant',content:reply});
+    if(chatHistory.length>16) chatHistory=chatHistory.slice(-16);
+    addMsg('bot',reply);
+    setSpeech(reply.length>44?reply.slice(0,44)+'...':reply);
+    setEmotion(moodFromReply(reply));
+  }catch(e){
+    addMsg('bot','Brain glitch! Try again? 🌿');
+    setEmotion('sad');
+  }
+}
+document.getElementById('chat-send').addEventListener('click',sendChat);
+document.getElementById('chat-in').addEventListener('keydown',e=>{if(e.key==='Enter')sendChat();});
+
+// ════════════════════════════════════════════════════════
+// PERSONALITY
+// ════════════════════════════════════════════════════════
+function selectP(el){
+  document.querySelectorAll('.p-opt').forEach(x=>x.classList.remove('sel'));
+  el.classList.add('sel'); selectedP=el.dataset.id;
+}
+function confirmPersonality(){
+  personality=selectedP;
+  document.getElementById('p-badge').textContent=PERSONALITIES[personality].name;
+  closeModal('modal-p'); idleTick();
+  setSpeech(PERSONALITIES[personality].greet);
+  setEmotion('excited');
+  bounceEyes();
+  applyBodyImpulse(0,-9);
+}
+
+// ════════════════════════════════════════════════════════
+// UPLOAD
+// ════════════════════════════════════════════════════════
+document.getElementById('file-in').addEventListener('change',function(e){
+  const file=e.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    document.getElementById('up-preview').src=ev.target.result;
+    document.getElementById('up-preview').style.display='block';
+    document.getElementById('id-btn').style.display='block';
+  };
+  reader.readAsDataURL(file);
+});
+document.getElementById('id-btn').addEventListener('click',async function(){
+  const file=document.getElementById('file-in').files[0]; if(!file) return;
+  this.disabled=true; this.innerHTML='<div class="ldots"><span></span><span></span><span></span></div>';
+  setEmotion('curious'); setSpeech('Let me look... 🔍');
+  const reader=new FileReader();
+  reader.onload=async ev=>{
+    const b64=ev.target.result.split(',')[1],mt=file.type||'image/jpeg';
+    try{
+      const reply=await callClaude([{role:'user',content:[
+        {type:'image',source:{type:'base64',media_type:mt,data:b64}},
+        {type:'text',text:'Identify the plant. Reply ONLY valid JSON: {"name":"plant name with emoji","care":"fun care tip max 50 words"}'}
+      ]}],'You are a plant expert. JSON only.');
+      let res; try{res=JSON.parse(reply.replace(/```json|```/g,'').trim());}catch{res={name:'🌿 Mystery Plant',care:'Unique! Give it love and water.'};}
+      plantType=res.name;
+      document.getElementById('plant-content').innerHTML=`<div class="plant-name">${res.name}</div><div class="plant-care">${res.care}</div>`;
+      setSpeech(`Oh wow, ${res.name}! I'll remember it! 🌱`);
+      addMsg('bot',`I identified: ${res.name}! ${res.care}`);
+      setEmotion('love'); closeModal('modal-u'); bounceEyes(); applyBodyImpulse(0,-10);
+    }catch{
+      addMsg('bot',"Couldn't see it... try another photo? 📸");
+      setEmotion('sad');
+    }finally{
+      document.getElementById('id-btn').disabled=false;
+      document.getElementById('id-btn').textContent='🔍 Re-identify';
+    }
+  };
+  reader.readAsDataURL(file);
+});
+
+// ════════════════════════════════════════════════════════
+// MODALS
+// ════════════════════════════════════════════════════════
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+document.getElementById('btn-personality').addEventListener('click',()=>openModal('modal-p'));
+document.getElementById('btn-upload').addEventListener('click',()=>openModal('modal-u'));
+document.getElementById('btn-home').addEventListener('click',()=>{
+  lastInteraction=Date.now(); setEmotion('happy'); setSpeech('Home sweet home! 🏠🌿'); idleTick();
+  bounceEyes(); applyBodyImpulse(0,-5);
+});
+document.querySelectorAll('.overlay').forEach(el=>el.addEventListener('click',e=>{if(e.target===el)el.classList.remove('open')}));
+
+// ════════════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════════════
+setEmotion('happy');
+idleTick();
+// Set default personality card
+document.querySelector('[data-id="fiery"]').classList.add('sel');
+</script>
+</body>
+</html>
